@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LegalDebunkr</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.2/css/all.min.css">
+</head>
+<body>
+    <div class="wrapper">
+        <input type="checkbox" id="btn" hidden>
+        <label for="btn" class="menu-btn">
+            <i class="fas fa-bars"></i>
+            <i class="fas fa-times"></i>
+        </label>
+        <nav id="sidebar">
+            <div class="title">LegalDebunkr</div>
+            <ul class="list-items">
+                <li><a href="/"><i class="fas fa-home"></i>Home</a></li>
+                <li><a href="/profile"><i class="fas fa-user"></i>Profile</a></li>
+                <li><a href="/saved-queries"><i class="fas fa-save"></i>Saved Queries</a></li>
+                <li><a href="/contract-debunkr"><i class="fas fa-file-contract"></i>Contract Debunkr</a></li>
+                <li><a href="/law-debunkr"><i class="fas fa-scale-balanced"></i>Law Debunkr</a></li>
+                <li><a href="/about"><i class="fas fa-info-circle"></i>About Us</a></li>
+                <li><a href="/contact"><i class="fas fa-envelope"></i>Contact</a></li>
+            </ul>
+        </nav>
+    </div>
+    
+    <div class="content">
+        <div class="header">Welcome to LegalDebunkr</div>
+        <p>Your AI-powered legal assistant for understanding complex contracts and legal matters.</p>
+        
+        <section>
+            <h2>About Us</h2>
+            <p>LegalDebunkr is designed to help individuals, especially those from underprivileged communities, decode legal jargon in contracts and financial documents.</p>
+        </section>
+        
+        <section>
+            <h2>Contact Info</h2>
+            <p>Email: support@legaldebunkr.com</p>
+            <p>Phone: (123) 456-7890</p>
+        </section>
+        
+        <section>
+            <h2>Credits</h2>
+            <p>Developed by the LegalDebunkr Team</p>
+        </section>
+    </div>
+</body>
+</html>
+
