@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Saved Queries - LegalDebunkr</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/sidebar.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.2/css/all.min.css">
+</head>
+<body>
+
+    <!-- Sidebar (Same as before) -->
+    <div class="wrapper">
+        <input type="checkbox" id="btn" hidden>
+        <label for="btn" class="menu-btn">
+            <i class="fas fa-bars"></i>
+            <i class="fas fa-times"></i>
+        </label>
+
+        <nav id="sidebar">
+            <div class="title">LegalDebunkr</div>
+            <ul class="list-items">
+                <li><a href="index.html"><i class="fas fa-home"></i> Home</a></li>
+                <li><a href="profile.html"><i class="fas fa-user"></i> Profile</a></li>
+                <li><a href="saved_queries.html"><i class="fas fa-save"></i> Saved Queries</a></li>
+                <li><a href="contract_debunkr.html"><i class="fas fa-file-contract"></i> Contract Debunkr</a></li>
+                <li><a href="law_debunkr.html"><i class="fas fa-balance-scale"></i> Law Debunkr</a></li>
+            </ul>
+        </nav>
+    </div>
+
+    <!-- Main Content for Saved Queries -->
+    <div class="content">
+        <h1>Your Saved Queries</h1>
+        <p>Here are the queries you have saved. You can view or delete them at any time.</p>
+
+        <!-- Saved Queries List -->
+        <section class="saved-queries-section">
+            <ul id="savedQueriesList" style="list-style-type: none; padding-left: 0;">
+                <!-- Saved queries will be listed here dynamically -->
+            </ul>
+        </section>
+    </div>
+
+    <script src="js/saved_queries.js"></script>
+</body>
+</html>

@@ -1,0 +1,119 @@
+body {
+    background-color: #f8f9fa;
+    color: #333;
+}
+
+.content {
+    margin-left: 300px;
+    padding: 20px;
+    text-align: left;
+}
+
+h1 {
+    font-size: 28px;
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+
+p {
+    font-size: 16px;
+}
+
+.content h1 {
+    text-align: center left; /* Center the profile title */
+}
+
+.profile-container {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start; /* Shift everything further left */
+    gap: 30px;
+    padding: 20px;
+    background: white;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    margin-top: 20px;
+    width: 80%; /* Shift further left */
+}
+
+.profile-left {
+    flex: 1;
+    text-align: center;
+}
+
+.profile-pic {
+    margin-bottom: 20px;
+}
+
+.profile-pic img {
+    width: 200px; /* Larger profile picture */
+    height: 200px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 10px;
+}
+
+.profile-pic input[type="file"] {
+    display: none;
+}
+
+.file-label {
+    padding: 12px 25px;
+    background: #ff5733; /* New color for the "Choose File" button */
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+    display: inline-block;
+    text-align: center;
+    margin-top: 10px;
+}
+
+.file-label:hover {
+    background: #c13b1e; /* Darker shade on hover */
+}
+
+.profile-right {
+    flex: 2;
+    width: 100%;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    font-weight: bold;
+    display: block;
+    margin-bottom: 5px;
+}
+
+.form-group input, 
+.form-group select, 
+.form-group textarea {
+    width: 100%;
+    padding: 8px;
+    margin-top: 5px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.form-group textarea {
+    resize: vertical;
+}
+
+.btn {
+    padding: 10px 20px;
+    background: #007bff;
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+    display: block;
+    width: 100%;
+}
+
+.btn:hover {
+    background: #0056b3;
+}
+
