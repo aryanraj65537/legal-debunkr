@@ -55,7 +55,7 @@ async function sendToOpenAI(text) {
         return;
     }
 
-    const apiKey = "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"; // Replace with actual OpenAI API key
+    const apiKey = "YOUR_OPENAI_API_KEY"; // Replace with actual OpenAI API key
     const endpoint = "https://api.openai.com/v1/chat/completions";
 
     const requestBody = {
