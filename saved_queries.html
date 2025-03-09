@@ -7,10 +7,12 @@
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="css/sidebar.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.2/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="config.js"></script>
 </head>
 <body>
-
-    <!-- Sidebar (Same as before) -->
     <div class="wrapper">
         <input type="checkbox" id="btn" hidden>
         <label for="btn" class="menu-btn">
@@ -30,19 +32,68 @@
         </nav>
     </div>
 
-    <!-- Main Content for Saved Queries -->
     <div class="content">
         <h1>Your Saved Queries</h1>
-        <p>Here are the queries you have saved. You can view or delete them at any time.</p>
+        <p>Here are the queries you have saved. Click a button to view details.</p>
 
-        <!-- Saved Queries List -->
+        <div id="auth-message" style="color: red; display: none;">You must be logged in with Google to view saved queries.</div>
+        
         <section class="saved-queries-section">
-            <ul id="savedQueriesList" style="list-style-type: none; padding-left: 0;">
-                <!-- Saved queries will be listed here dynamically -->
-            </ul>
+            <ul id="savedQueriesList" style="list-style-type: none; padding-left: 0;"></ul>
         </section>
+
+        <div id="queryDetails" style="display: none; margin-top: 20px;">
+            <h2>Query Details</h2>
+            <p><strong>Original:</strong></p>
+            <p id="queryOriginal"></p>
+            <p><strong>Summary:</strong></p>
+            <p id="querySummary"></p>
+        </div>
     </div>
 
-    <script src="js/saved_queries.js"></script>
+    <script>
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        const savedQueriesList = document.getElementById("savedQueriesList");
+        const queryDetails = document.getElementById("queryDetails");
+        const queryOriginal = document.getElementById("queryOriginal");
+        const querySummary = document.getElementById("querySummary");
+        const authMessage = document.getElementById("auth-message");
+
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                fetchSavedQueries(user.uid);
+            } else {
+                authMessage.style.display = "block";
+            }
+        });
+
+        function fetchSavedQueries(userId) {
+            db.collection("users").doc(userId).collection("saved_queries").orderBy("date", "desc").get()
+                .then(snapshot => {
+                    savedQueriesList.innerHTML = "";
+                    snapshot.forEach(doc => {
+                        const data = doc.data();
+                        const button = document.createElement("button");
+                        button.textContent = data.date.toDate().toLocaleString();
+                        button.style.display = "block";
+                        button.style.marginBottom = "10px";
+                        button.addEventListener("click", () => displayQueryDetails(data));
+                        savedQueriesList.appendChild(button);
+                    });
+                })
+                .catch(error => {
+                    console.error("Error fetching saved queries:", error);
+                });
+        }
+
+        function displayQueryDetails(data) {
+            queryOriginal.textContent = data.original;
+            querySummary.textContent = data.summary;
+            queryDetails.style.display = "block";
+        }
+    </script>
 </body>
 </html>
