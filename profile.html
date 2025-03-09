@@ -115,6 +115,32 @@
                 console.error("Sign-out error:", error);
             });
         });
+
+        profileForm.addEventListener("submit", (event) => {
+            event.preventDefault();
+
+            if (!currentUser) {
+                errorMessage.style.display = "block";
+                return;
+            }
+
+            const userId = currentUser.uid;
+            const userData = {
+                name: document.getElementById("name").value,
+                age: parseInt(document.getElementById("age").value, 10),
+                sex: document.getElementById("sex").value,
+                bio: document.getElementById("bio").value
+            };
+
+            db.collection("users").doc(userId).set(userData)
+                .then(() => {
+                    console.log("Profile saved successfully");
+                    errorMessage.style.display = "none";
+                })
+                .catch((error) => {
+                    console.error("Error saving profile:", error);
+                });
+        });
     </script>
 </body>
 </html>
