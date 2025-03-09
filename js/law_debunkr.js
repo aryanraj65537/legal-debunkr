@@ -1,70 +1,21 @@
-document.getElementById("analyzeBtn").addEventListener("click", async function () {
-    const fileInput = document.getElementById("contractFile");
-    if (fileInput.files.length === 0) {
-        alert("Please upload a contract file to simplify.");
+document.getElementById("analyzeBtn").addEventListener("click", async function() {
+    const legalText = document.getElementById("legalText").value;
+
+    if (!legalText.trim()) {
+        alert("Please enter some legal text to simplify.");
         return;
     }
 
-    const file = fileInput.files[0];
-    const fileType = file.name.split('.').pop().toLowerCase();
-
-    if (fileType === "pdf") {
-        processPDF(file);
-    } else {
-        alert("Currently, only PDF files are supported. Please upload a valid PDF.");
-    }
-});
-
-function processPDF(file) {
-    const reader = new FileReader();
-    reader.readAsArrayBuffer(file);
-
-    reader.onload = async function () {
-        const typedarray = new Uint8Array(reader.result);
-
-        // Ensure pdf.js is loaded
-        if (typeof pdfjsLib === "undefined" || !pdfjsLib.getDocument) {
-            console.error("pdf.js is not properly loaded.");
-            document.getElementById("output").innerHTML = `<p>PDF processing library not found. Please refresh and try again.</p>`;
-            return;
-        }
-
-        pdfjsLib.getDocument(typedarray).promise.then(async function (pdf) {
-            let extractedText = "";
-            for (let i = 1; i <= pdf.numPages; i++) {
-                const page = await pdf.getPage(i);
-                const textContent = await page.getTextContent();
-                extractedText += textContent.items.map(item => item.str).join(" ") + "\n\n";
-            }
-            sendToOpenAI(extractedText);
-        }).catch(error => {
-            console.error("Error loading PDF:", error);
-            document.getElementById("output").innerHTML = `<p>Failed to read the PDF. Please try another file.</p>`;
-        });
-    };
-
-    reader.onerror = function () {
-        console.error("Error reading PDF file.");
-        document.getElementById("output").innerHTML = `<p>Failed to read the PDF. Please try again.</p>`;
-    };
-}
-
-async function sendToOpenAI(text) {
-    if (!text.trim()) {
-        document.getElementById("output").innerHTML = `<p>No text extracted. Please upload a valid document.</p>`;
-        return;
-    }
-
-    const apiKey = "YOUR_OPENAI_API_KEY"; // Replace with actual OpenAI API key
+    const apiKey = "YOUR_OPENAI_API_KEY"; // Replace with your actual OpenAI API key
     const endpoint = "https://api.openai.com/v1/chat/completions";
 
     const requestBody = {
-        model: "gpt-4",
+        model: "gpt-4", // Use the latest available model
         messages: [
-            { role: "system", content: "You are a legal expert simplifying complex contract language into layman's terms." },
-            { role: "user", content: `Simplify this contract text: ${text}` }
+            { role: "system", content: "You are a legal expert simplifying complex legal jargon into layman's terms." },
+            { role: "user", content: `Simplify this legal text: ${legalText}` }
         ],
-        max_tokens: 800,
+        max_tokens: 500,
         temperature: 0.7
     };
 
@@ -87,6 +38,6 @@ async function sendToOpenAI(text) {
         }
     } catch (error) {
         console.error("Error:", error);
-        document.getElementById("output").innerHTML = `<p>Failed to simplify the contract. Please try again later.</p>`;
+        document.getElementById("output").innerHTML = `<p>Failed to simplify text. Please try again later.</p>`;
     }
-}
+});
