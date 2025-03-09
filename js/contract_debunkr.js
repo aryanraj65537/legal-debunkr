@@ -63,13 +63,13 @@ document.addEventListener("DOMContentLoaded", function () {
             return;
         }
 
-        const apiKey = "YOUR_OPENAI_API_KEY"; // Replace with actual OpenAI API key
+        const apiKey = "#"; // Replace with actual OpenAI API key
         const endpoint = "https://api.openai.com/v1/chat/completions";
 
         const requestBody = {
             model: "gpt-4",
             messages: [
-                { role: "system", content: "You are a legal expert simplifying complex contract language into layman's terms." },
+                { role: "system", content: "You are a legal expert simplifying complex contract language into layman's terms. Make the output concise and clear (2-3 sentences)" },
                 { role: "user", content: `Simplify this contract text: ${text}` }
             ],
             max_tokens: 800,
@@ -90,6 +90,18 @@ document.addEventListener("DOMContentLoaded", function () {
 
             if (data.choices && data.choices.length > 0) {
                 document.getElementById("output").innerHTML = `<p>${data.choices[0].message.content}</p>`;
+
+                // Show the Save Query button after the result is displayed
+                const saveQueryBtn = document.getElementById("saveQueryBtn");
+                saveQueryBtn.style.display = "block"; // Make the Save Query button visible
+
+                // Store the simplified text for later saving
+                saveQueryBtn.addEventListener("click", async function() {
+                    const userId = "user-id-placeholder"; // Replace with actual user ID logic if using Firebase Auth
+                    await saveQuery(text, userId, "Contract Query", data.choices[0].message.content); // Save both original and simplified texts
+                    alert("Query saved successfully!");
+                });
+
             } else {
                 document.getElementById("output").innerHTML = `<p>Error processing the request. Try again.</p>`;
             }
@@ -99,3 +111,24 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 });
+
+// Save the query to Firestore
+async function saveQuery(originalText, userId, title, simplifiedText) {
+    if (!userId) {
+        alert("You must be logged in to save queries.");
+        return;
+    }
+
+    try {
+        const db = firebase.firestore(); // Firebase Firestore reference
+        await db.collection("saved_queries").add({
+            userId: userId,
+            title: title,
+            originalText: originalText,
+            simplifiedText: simplifiedText,
+            timestamp: new Date()
+        });
+    } catch (error) {
+        console.error("Error saving query:", error);
+    }
+}
