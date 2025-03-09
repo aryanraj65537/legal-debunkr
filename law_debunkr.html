@@ -7,6 +7,9 @@
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="css/sidebar.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.2/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
     <script src="config.js"></script>
 </head>
 <body>
@@ -70,7 +73,7 @@
     </div>
 
     <script>
-
+firebase.initializeApp(firebaseConfig);
 document.getElementById("analyzeBtn").addEventListener("click", async function() {
     const legalText = document.getElementById("legalText").value;
 
@@ -84,7 +87,7 @@ document.getElementById("analyzeBtn").addEventListener("click", async function()
     const requestBody = {
         model: "gpt-4", // Use the latest available model
         messages: [
-            { role: "system", content: "You are a legal expert simplifying complex legal jargon into layman's terms. Make the output concise and clear (2-3 sentences)" },
+            { role: "system", content: "You are a legal expert simplifying complex legal jargon into layman's terms. Make the output concise and clear (2-3 sentences)." },
             { role: "user", content: `Simplify this legal text: ${legalText}` }
         ],
         max_tokens: 500,
@@ -111,13 +114,13 @@ document.getElementById("analyzeBtn").addEventListener("click", async function()
             const saveQueryBtn = document.getElementById("saveQueryBtn");
             saveQueryBtn.style.display = "block"; // Make the Save Query button visible
 
-            // Store the simplified text for later saving
             saveQueryBtn.addEventListener("click", async function() {
-                const userId = "user-id-placeholder"; // Replace with actual user ID logic if using Firebase Auth
-                await saveQuery(legalText, userId, "Legal Query", simplifiedText); // Save both original and simplified texts
-                alert("Query saved successfully!");
+                console.log(firebase.auth().currentUser);
+                const user = firebase.auth().currentUser;
+                    const userId = user.uid;
+                    await saveQuery(legalText, userId, simplifiedText);
+                    alert("Query saved successfully!");
             });
-
         } else {
             document.getElementById("output").innerHTML = `<p>Error processing the request. Try again.</p>`;
         }
@@ -128,25 +131,20 @@ document.getElementById("analyzeBtn").addEventListener("click", async function()
 });
 
 // Save the query to Firestore
-async function saveQuery(originalText, userId, title, simplifiedText) {
-    if (!userId) {
-        alert("You must be logged in to save queries.");
-        return;
-    }
-
+async function saveQuery(originalText, userId, simplifiedText) {
     try {
         const db = firebase.firestore(); // Firebase Firestore reference
-        await db.collection("saved_queries").add({
-            userId: userId,
-            title: title,
-            originalText: originalText,
-            simplifiedText: simplifiedText,
-            timestamp: new Date()
+        const queryRef = db.collection("users").doc(userId).collection("saved_queries");
+        await queryRef.add({
+            date: firebase.firestore.FieldValue.serverTimestamp(),
+            original: originalText,
+            summary: simplifiedText
         });
     } catch (error) {
         console.error("Error saving query:", error);
     }
 }
+
 
     </script>
 </body>
