@@ -1,54 +1,92 @@
-// Event listener for the 'Simplify' button to call GPT API and simplify legal text
 document.getElementById("analyzeBtn").addEventListener("click", async function () {
-    const legalText = document.getElementById("legalText").value.trim();
-    const output = document.getElementById("output");
-    const analyzeBtn = document.getElementById("analyzeBtn");
-
-    if (!legalText) {
-        output.innerHTML = "<p>Please enter some legal text to simplify.</p>";
+    const fileInput = document.getElementById("contractFile");
+    if (fileInput.files.length === 0) {
+        alert("Please upload a contract file to simplify.");
         return;
     }
 
-    // Disable the button to prevent multiple clicks
-    analyzeBtn.disabled = true;
-    analyzeBtn.innerHTML = "Simplifying... Please wait.";
+    const file = fileInput.files[0];
+    const fileType = file.name.split('.').pop().toLowerCase();
 
-    output.innerHTML = "Simplifying... Please wait.";
+    if (fileType === "pdf") {
+        processPDF(file);
+    } else {
+        alert("Currently, only PDF files are supported. Please upload a valid PDF.");
+    }
+});
 
-    // Call the OpenAI API to simplify the text
+function processPDF(file) {
+    const reader = new FileReader();
+    reader.readAsArrayBuffer(file);
+
+    reader.onload = async function () {
+        const typedarray = new Uint8Array(reader.result);
+
+        // Ensure pdf.js is loaded
+        if (typeof pdfjsLib === "undefined" || !pdfjsLib.getDocument) {
+            console.error("pdf.js is not properly loaded.");
+            document.getElementById("output").innerHTML = `<p>PDF processing library not found. Please refresh and try again.</p>`;
+            return;
+        }
+
+        pdfjsLib.getDocument(typedarray).promise.then(async function (pdf) {
+            let extractedText = "";
+            for (let i = 1; i <= pdf.numPages; i++) {
+                const page = await pdf.getPage(i);
+                const textContent = await page.getTextContent();
+                extractedText += textContent.items.map(item => item.str).join(" ") + "\n\n";
+            }
+            sendToOpenAI(extractedText);
+        }).catch(error => {
+            console.error("Error loading PDF:", error);
+            document.getElementById("output").innerHTML = `<p>Failed to read the PDF. Please try another file.</p>`;
+        });
+    };
+
+    reader.onerror = function () {
+        console.error("Error reading PDF file.");
+        document.getElementById("output").innerHTML = `<p>Failed to read the PDF. Please try again.</p>`;
+    };
+}
+
+async function sendToOpenAI(text) {
+    if (!text.trim()) {
+        document.getElementById("output").innerHTML = `<p>No text extracted. Please upload a valid document.</p>`;
+        return;
+    }
+
+    const apiKey = "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"; // Replace with actual OpenAI API key
+    const endpoint = "https://api.openai.com/v1/chat/completions";
+
+    const requestBody = {
+        model: "gpt-4",
+        messages: [
+            { role: "system", content: "You are a legal expert simplifying complex contract language into layman's terms." },
+            { role: "user", content: `Simplify this contract text: ${text}` }
+        ],
+        max_tokens: 800,
+        temperature: 0.7
+    };
+
     try {
-        const response = await fetch("https://api.openai.com/v1/completions", {
+        const response = await fetch(endpoint, {
             method: "POST",
             headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer YOUR_OPENAI_API_KEY`, // Add your OpenAI API key here
+                "Authorization": `Bearer ${apiKey}`,
+                "Content-Type": "application/json"
             },
-            body: JSON.stringify({
-                model: "text-davinci-003", // You can also use other models like "gpt-3.5-turbo"
-                prompt: `Simplify the following legal text so that it is easily understandable by a general audience:\n\n${legalText}`,
-                max_tokens: 150, // Limit the length of the response
-                temperature: 0.7, // Control the randomness of the model's response
-            }),
+            body: JSON.stringify(requestBody)
         });
 
         const data = await response.json();
-        
+
         if (data.choices && data.choices.length > 0) {
-            output.innerHTML = `
-                <p><strong>Original Text:</strong></p>
-                <p>${legalText}</p>
-                <p><strong>Simplified Version:</strong></p>
-                <p>${data.choices[0].text.trim()}</p>
-            `;
+            document.getElementById("output").innerHTML = `<p>${data.choices[0].message.content}</p>`;
         } else {
-            output.innerHTML = "<p>Could not simplify the text. Please try again.</p>";
+            document.getElementById("output").innerHTML = `<p>Error processing the request. Try again.</p>`;
         }
     } catch (error) {
-        console.error("Error simplifying text:", error);
-        output.innerHTML = "<p>An error occurred. Please try again later.</p>";
+        console.error("Error:", error);
+        document.getElementById("output").innerHTML = `<p>Failed to simplify the contract. Please try again later.</p>`;
     }
-
-    // Re-enable the button after the operation
-    analyzeBtn.disabled = false;
-    analyzeBtn.innerHTML = "Simplify";
-});
+}
