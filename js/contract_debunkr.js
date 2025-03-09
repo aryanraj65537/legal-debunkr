@@ -1,3 +1,5 @@
+import { OPENAI_API_KEY } from "./config.js";
+
 document.addEventListener("DOMContentLoaded", function () {
     const analyzeBtn = document.getElementById("analyzeBtn");
     const fileInput = document.getElementById("contractFile");
@@ -30,7 +32,6 @@ document.addEventListener("DOMContentLoaded", function () {
         reader.onload = async function () {
             const typedarray = new Uint8Array(reader.result);
 
-            // Ensure pdf.js is loaded
             if (typeof pdfjsLib === "undefined" || !pdfjsLib.getDocument) {
                 console.error("pdf.js is not properly loaded.");
                 document.getElementById("output").innerHTML = `<p>PDF processing library not found. Please refresh and try again.</p>`;
@@ -63,7 +64,6 @@ document.addEventListener("DOMContentLoaded", function () {
             return;
         }
 
-        const apiKey = "#"; // Replace with actual OpenAI API key
         const endpoint = "https://api.openai.com/v1/chat/completions";
 
         const requestBody = {
@@ -80,7 +80,7 @@ document.addEventListener("DOMContentLoaded", function () {
             const response = await fetch(endpoint, {
                 method: "POST",
                 headers: {
-                    "Authorization": `Bearer ${apiKey}`,
+                    "Authorization": `Bearer ${OPENAI_API_KEY}`,
                     "Content-Type": "application/json"
                 },
                 body: JSON.stringify(requestBody)
@@ -91,14 +91,12 @@ document.addEventListener("DOMContentLoaded", function () {
             if (data.choices && data.choices.length > 0) {
                 document.getElementById("output").innerHTML = `<p>${data.choices[0].message.content}</p>`;
 
-                // Show the Save Query button after the result is displayed
                 const saveQueryBtn = document.getElementById("saveQueryBtn");
-                saveQueryBtn.style.display = "block"; // Make the Save Query button visible
+                saveQueryBtn.style.display = "block";
 
-                // Store the simplified text for later saving
                 saveQueryBtn.addEventListener("click", async function() {
-                    const userId = "user-id-placeholder"; // Replace with actual user ID logic if using Firebase Auth
-                    await saveQuery(text, userId, "Contract Query", data.choices[0].message.content); // Save both original and simplified texts
+                    const userId = "user-id-placeholder";
+                    await saveQuery(text, userId, "Contract Query", data.choices[0].message.content);
                     alert("Query saved successfully!");
                 });
 
@@ -112,7 +110,6 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 });
 
-// Save the query to Firestore
 async function saveQuery(originalText, userId, title, simplifiedText) {
     if (!userId) {
         alert("You must be logged in to save queries.");
@@ -120,7 +117,7 @@ async function saveQuery(originalText, userId, title, simplifiedText) {
     }
 
     try {
-        const db = firebase.firestore(); // Firebase Firestore reference
+        const db = firebase.firestore();
         await db.collection("saved_queries").add({
             userId: userId,
             title: title,

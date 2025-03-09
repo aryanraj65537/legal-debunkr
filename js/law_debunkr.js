@@ -1,3 +1,5 @@
+import { OPENAI_API_KEY } from "./config.js";
+
 document.getElementById("analyzeBtn").addEventListener("click", async function() {
     const legalText = document.getElementById("legalText").value;
 
@@ -6,7 +8,6 @@ document.getElementById("analyzeBtn").addEventListener("click", async function()
         return;
     }
 
-    const apiKey = "#"; // Replace with your actual OpenAI API key
     const endpoint = "https://api.openai.com/v1/chat/completions";
 
     const requestBody = {
@@ -23,7 +24,7 @@ document.getElementById("analyzeBtn").addEventListener("click", async function()
         const response = await fetch(endpoint, {
             method: "POST",
             headers: {
-                "Authorization": `Bearer ${apiKey}`,
+                "Authorization": `Bearer ${OPENAI_API_KEY}`,
                 "Content-Type": "application/json"
             },
             body: JSON.stringify(requestBody)
