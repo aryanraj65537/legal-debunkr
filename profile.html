@@ -7,139 +7,114 @@
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="css/sidebar.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.2/css/all.min.css">
-    <!-- Firebase App (required) -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-    <!-- Firebase Authentication -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
     <script src="config.js"></script>
 </head>
 <body>
-
-    <!-- Sidebar -->
-    <div class="wrapper">
-        <input type="checkbox" id="btn" hidden>
-        <label for="btn" class="menu-btn">
-            <i class="fas fa-bars"></i>
-            <i class="fas fa-times"></i>
-        </label>
-
-        <nav id="sidebar">
-            <div class="title">Side Menu</div>
-            <ul class="list-items">
-                <li><a href="index.html"><i class="fas fa-home"></i> Home</a></li>
-                <li><a href="profile.html"><i class="fas fa-user"></i> Profile</a></li>
-                <li><a href="saved_queries.html"><i class="fas fa-save"></i> Saved Queries</a></li>
-                <li><a href="contract_debunkr.html"><i class="fas fa-file-contract"></i> Contract Debunkr</a></li>
-                <li><a href="law_debunkr.html"><i class="fas fa-balance-scale"></i> Law Debunkr</a></li>
-                <div class="icons">
-                    <a href="https://www.facebook.com" target="_blank"><i class="fab fa-facebook-f"></i></a>
-                    <a href="https://www.twitter.com" target="_blank"><i class="fab fa-twitter"></i></a>
-                    <a href="https://www.github.com" target="_blank"><i class="fab fa-github"></i></a>
-                    <a href="https://www.youtube.com" target="_blank"><i class="fab fa-youtube"></i></a>
-                </div>
-            </ul>
-        </nav>
-    </div>
-
-    <!-- Main Content -->
     <div class="content">
         <h1>Profile</h1>
         <div class="profile-container">
             <div class="profile-left">
-                <!-- Google Sign-In Button -->
-        <div id="auth-container">
-            <div id="user-info" style="display: none;">
-                <img id="user-pic" src="" alt="User Picture" style="width: 50px; border-radius: 50%;">
-                <span id="user-name"></span>
-                <button id="sign-out-btn">Sign Out</button>
-            </div>
-            <div id="sign-in-container">
-                <button id="google-signin-btn">
-                    <img src="https://developers.google.com/identity/images/btn_google_signin_dark_normal_web.png" alt="Sign in with Google">
-                </button>
-            </div>
-        </div>
+                <div id="auth-container">
+                    <div id="user-info" style="display: none;">
+                        <img id="user-pic" src="" alt="User Picture" style="width: 50px; border-radius: 50%;">
+                        <span id="user-name"></span>
+                        <button id="sign-out-btn">Sign Out</button>
+                    </div>
+                    <div id="sign-in-container">
+                        <button id="google-signin-btn">
+                            <img src="https://developers.google.com/identity/images/btn_google_signin_dark_normal_web.png" alt="Sign in with Google">
+                        </button>
+                    </div>
+                </div>
             </div>
             <div class="profile-right">
-                <form action="#" method="POST" enctype="multipart/form-data">
+                <form id="profile-form">
                     <div class="form-group">
                         <label for="name">Name:</label>
                         <input type="text" id="name" name="name" required>
                     </div>
-
                     <div class="form-group">
                         <label for="age">Age:</label>
                         <input type="number" id="age" name="age" required>
                     </div>
-
                     <div class="form-group">
                         <label for="sex">Sex:</label>
-                        <select id="sex" name="sex" required>
-                            <option value="male">Male</option>
-                            <option value="female">Female</option>
-                            <option value="other">Other</option>
-                            <option value="prefer_not">Prefer not to say</option>
-                        </select>
+                        <input type="text" id="sex" name="sex" required>
                     </div>
-
                     <div class="form-group">
                         <label for="bio">Bio:</label>
                         <textarea id="bio" name="bio" rows="3" placeholder="Tell us about yourself..."></textarea>
                     </div>
-
                     <button type="submit" class="btn">Save Profile</button>
+                    <p id="error-message" style="color: red; display: none;">Must log in with Google</p>
                 </form>
             </div>
         </div>
     </div>
-
+    
     <script>
-        function previewImage(event) {
-            var reader = new FileReader();
-            reader.onload = function () {
-                var output = document.getElementById('preview');
-                output.src = reader.result;
-            };
-            reader.readAsDataURL(event.target.files[0]);
-        }
-
-        // Initialize Firebase (Ensure config.js is loaded first)
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
-    
+        const db = firebase.firestore();
+
         const googleSignInBtn = document.getElementById("google-signin-btn");
         const signOutBtn = document.getElementById("sign-out-btn");
         const userInfo = document.getElementById("user-info");
         const userPic = document.getElementById("user-pic");
         const userName = document.getElementById("user-name");
         const signInContainer = document.getElementById("sign-in-container");
-    
-        // Google Sign-In
+        const profileForm = document.getElementById("profile-form");
+        const errorMessage = document.getElementById("error-message");
+
+        let currentUser = null;
+
         googleSignInBtn.addEventListener("click", () => {
             const provider = new firebase.auth.GoogleAuthProvider();
             auth.signInWithPopup(provider)
                 .then((result) => {
                     const user = result.user;
+                    currentUser = user;
                     userPic.src = user.photoURL;
                     userName.textContent = user.displayName;
                     userInfo.style.display = "block";
                     signInContainer.style.display = "none";
+
+                    // Fetch user data from Firestore and populate form
+                    db.collection("users").doc(user.uid).get().then((doc) => {
+                        if (doc.exists) {
+                            const data = doc.data();
+                            document.getElementById("name").value = data.name || "";
+                            document.getElementById("age").value = data.age || "";
+                            document.getElementById("sex").value = data.sex || "";
+                            document.getElementById("bio").value = data.bio || "";
+                        }
+                    }).catch((error) => {
+                        console.error("Error fetching user data:", error);
+                    });
                 })
                 .catch((error) => {
                     console.error("Sign-in error:", error);
                 });
         });
-    
-        // Sign Out
+
         signOutBtn.addEventListener("click", () => {
             auth.signOut().then(() => {
                 userInfo.style.display = "none";
                 signInContainer.style.display = "block";
+                currentUser = null;
+                
+                // Clear form fields on sign out
+                document.getElementById("name").value = "";
+                document.getElementById("age").value = "";
+                document.getElementById("sex").value = "";
+                document.getElementById("bio").value = "";
             }).catch((error) => {
                 console.error("Sign-out error:", error);
             });
         });
     </script>
-
 </body>
 </html>
