@@ -87,9 +87,15 @@ document.getElementById("analyzeBtn").addEventListener("click", async function()
     const requestBody = {
         model: "gpt-4", // Use the latest available model
         messages: [
-            { role: "system", content: "You are a legal expert simplifying complex legal jargon into layman's terms. Make the output concise and clear (2-3 sentences)." },
-            { role: "user", content: `Simplify this legal text: ${legalText}` }
-        ],
+        { 
+        role: "system", 
+        content: "Analyze the following legal document or situation, breaking it down into a concise summary (2-4 sentences) that clearly explains its meaning in plain language. Identify any risks, unfair clauses, or legal traps, and highlight key legal protections that apply. Use specific laws, clauses, or relevant legal scenarios (real or hypothetical) to help the user understand. Ensure the explanation is easy to grasp, avoiding unnecessary legal jargon while maintaining accuracy and legal integrity. Format the response as follows: Summary: [Simplified explanation of the document/situation] Key Concerns/Risks: [Potential legal risks, unfair terms, or hidden clauses] Legal Protections: [Specific laws, clauses, or hypothetical examples explaining user rights] Example Input: 'I signed a lease that says my landlord can evict me at any time without notice. Is this legal?' Example Output: Summary: Your lease states that the landlord can evict you without notice, which may not be enforceable depending on tenant protection laws. Key Concerns/Risks: Sudden eviction without due process could violate local rental laws and your right to proper notice. Legal Protections: Many states require landlords to provide at least 30 days' notice before eviction (e.g., Tenant Protection Act, Sec. 5.1). If your lease contradicts this, it may be legally invalid. You may want to check your state’s rental laws or challenge this clause." 
+        },
+        { 
+        role: "user", 
+        content: `Analyze this legal situation: ${legalText}` 
+        }],
+
         max_tokens: 500,
         temperature: 0.7
     };
